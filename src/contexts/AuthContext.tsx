@@ -6,12 +6,12 @@ import { destroyCookie, setCookie, parseCookies }  from "nookies";
 
 import Router from 'next/router';
 
-
 type AuthConstextData = {
     user:UserProps;
     IsAuthenticated:boolean;
     singIn: (credentials: SingInProps)=> Promise<void>;
     singOut: () => void;
+    singUp: (credentials: SingUpProps) => Promise<void>;
 }
 
 type UserProps = {
@@ -23,6 +23,12 @@ type UserProps = {
 type SingInProps = {
     email: string;
     password: string;
+}
+
+type SingUpProps = {
+    name: string;
+    email:string;
+    password:string;
 }
 
 type AuthProviderProps = {
@@ -85,8 +91,28 @@ export function AuthProvider ({children}: AuthProviderProps){
         
     }
 
+    async function singUp({name, email, password}: SingUpProps){
+        
+        try {
+            const response = await api.post('/users', {
+                name,
+                email,
+                password
+            })
+
+            console.log('Cadastrado com sucesso!');
+
+            Router.push('/')
+            
+        } catch (error) {
+            console.log('Error ao cadastrar', error);
+            
+        }
+        
+    }
+
     return(
-        <AuthContext.Provider value={{ user,IsAuthenticated, singIn, singOut }}>
+        <AuthContext.Provider value={{ user,IsAuthenticated, singIn, singOut, singUp }}>
             {children}
         </AuthContext.Provider>
     )
