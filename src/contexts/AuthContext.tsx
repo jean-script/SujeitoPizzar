@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useState } from "react";
+import { createContext, ReactNode, useState, useEffect } from "react";
 
 import { api } from "../services/apiClient";
 
@@ -54,6 +54,32 @@ export function AuthProvider ({children}: AuthProviderProps){
     const [user, setUser] = useState<UserProps>();
 
     const IsAuthenticated = !!user;
+
+    useEffect(()=>{
+        
+        // tentar pegar token
+
+        const { '@nextauth.token':token } = parseCookies();
+
+        if(!token) {
+            api.get('/me').then(response =>{
+                const { id, name, email } = response.data;
+
+                setUser({
+                    id,
+                    name,
+                    email
+                })
+
+
+            })
+            .catch(()=>{
+                // se der erro desloga
+                singOut();
+            })
+        }
+
+    }, [])
 
     async function singIn({ email, password }: SingInProps){
         try{
